@@ -34,6 +34,7 @@ fetch("http://localhost:3000/api/products")
         // article.appendChild(p)
       }
       
+      /* obtient un lien url a partir de l'id */
       function makeAnchor(id) {
         const anchor = document.createElement("a")
         anchor.href = "./product.html?id=" + id
