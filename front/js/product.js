@@ -1,23 +1,23 @@
 const queryString = window.location.search
 const urlParams = new URLSearchParams(queryString)
 const id = urlParams.get("id")
+let product = null
+
 if (id != null) {
-    let itemPrice = 0
+    // let itemPrice = 0
     /* récupérer l'url de l'image et le txt dans le storage */
-    let imgUrl, altText
+    // let imgUrl, altText, articleName
+    fetch(`http://localhost:3000/api/products/${id}`)
+        .then((response) => response.json())
+        .then((res) => addproductinfo(res))
 }
 
-fetch(`http://localhost:3000/api/products/${id}`)
-    .then((response) => response.json())
-    .then((res) => getproductinfo(res))
 /* afficher le prix en local storage, récupère le prix de l'api et le colle dans la variable */
 
 
-function getproductinfo(kanap) {
+function addproductinfo(kanap) {
     const { altTxt, colors, description, imageUrl, name, price } = kanap
-    itemPrice = price
-    imgUrl = imageUrl
-    altText = altTxt
+    product = kanap
     makeImage(imageUrl, altTxt)
     makeTitle(name)
     makePrice(price)
@@ -76,15 +76,33 @@ if (button != null) {
     })
 }
 
+function isSameProduct(products, productToFind) {
+    return products.find(
+        (product) => product.id === productToFind.id && product.color === productToFind.color
+    )
+}
+
 /* objet pour storer dans le local storage */
 function saveCommande(color, quantity) {
-    const data = {
-        id: id,
-        color: color,
-        quantity: Number(quantity),
-        price: itemPrice,
-        imageUrl: imgUrl,
-        altTxt: altText
+    let products = []
+    const productStorage = localStorage.getItem("products")
+    if (productStorage) {
+        products = JSON.parse(productStorage)
     }
-    localStorage.setItem(id, JSON.stringify(data))
+
+    const newProduct = {
+        ...product,
+        color,
+        quantity: +quantity // equivalence de parseInt
+    }
+
+    const findProduct = isSameProduct(products, newProduct)
+
+    if (findProduct) {
+        findProduct.quantity += parseInt(quantity)
+    } else {
+        products.push(newProduct)
+    }
+
+    localStorage.setItem("products", JSON.stringify(products))
 }
